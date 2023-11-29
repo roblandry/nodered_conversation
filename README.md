@@ -1,4 +1,4 @@
-# localai-nodered
+# nodered_conversation
 Custom Component for Home Assistant.  
 This creates a NodeRed Conversation Agent (modified from openai conversation agent).  
 This will send a conversation to and from nodered to be used with LocalAI or OpenAI.
