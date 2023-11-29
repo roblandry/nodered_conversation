@@ -1,0 +1,33 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "nodered_url": "NodeRed Endpoint",
+          "nodered_user": "NodeRed Endpoint User",
+          "nodered_pass": "NodeRed Endpoint Pass"
+        },
+        "description": "Enter your NodeRed endpoint, user, and password.",
+        "title": "NodeRed Endpoint"
+      }
+    },
+    "error": {
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "nodered_url": "NodeRed Endpoint",
+          "nodered_user": "NodeRed Endpoint User",
+          "nodered_pass": "NodeRed Endpoint Pass"
+        },
+        "description": "Enter your NodeRed endpoint, user, and password.",
+        "title": "NodeRed Endpoint"
+      }
+    }
+  }
+}

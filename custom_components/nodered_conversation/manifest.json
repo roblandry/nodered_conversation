@@ -1,0 +1,11 @@
+{
+  "domain": "nodered_conversation",
+  "name": "NodeRed Conversation",
+  "codeowners": ["@roblandry"],
+  "config_flow": true,
+  "dependencies": ["conversation"],
+  "documentation": "https://www.home-assistant.io/integrations/openai_conversation",
+  "integration_type": "service",
+  "iot_class": "local_polling",
+  "version": "0.0.1"
+}

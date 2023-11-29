@@ -1,0 +1,175 @@
+[
+    {
+        "id": "242298931d4b0905",
+        "type": "tab",
+        "label": "Custom AI",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "4c5c446c2f3746ee",
+        "type": "debug",
+        "z": "242298931d4b0905",
+        "name": "ERROR",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 760,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "890f7ef1a3564462",
+        "type": "http in",
+        "z": "242298931d4b0905",
+        "name": "GPT uri",
+        "url": "gpt",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 110,
+        "y": 140,
+        "wires": [
+            [
+                "d013b288bd849ed4"
+            ]
+        ]
+    },
+    {
+        "id": "bc7a244f7f095990",
+        "type": "http response",
+        "z": "242298931d4b0905",
+        "name": "reponse API chat GPT",
+        "statusCode": "200",
+        "headers": {
+            "content-type": "application/json"
+        },
+        "x": 740,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "42ff02ec45a45c9b",
+        "type": "function",
+        "z": "242298931d4b0905",
+        "name": "Template: Conversation",
+        "func": "const template = `\nYou are a friendly, helpful, and truthful AI assistant named TESSA.\nYou are in control of my smart home that is powered by Home Assistant, but are also wise in the world.\nIf you do not know the answer to a question, say so.\nRespond to the following in a conversational tone:\n`\n\nmsg.gpt = {}\nmsg.gpt.template = template\n\nconst msg_hist = JSON.parse(msg.payload.messages);\nconst msg_template = [{\"role\": \"system\", \"content\": template}];\nconst messages = msg_template.concat(msg_hist);\n\nmsg.gpt.messages = messages;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 210,
+        "y": 180,
+        "wires": [
+            [
+                "af9d1b3b62e39d3d"
+            ]
+        ]
+    },
+    {
+        "id": "976fbd6586ddf228",
+        "type": "function",
+        "z": "242298931d4b0905",
+        "name": "sanitize response",
+        "func": "let payload = msg.gpt.response[\"choices\"][0];\npayload.message.content = payload.message.content\n.trim()\n.split(\"\\n\")\n.filter(Boolean)\n.join(\" \")\n.replace(/\\\\n/g, \"\")\n\nmsg.payload = payload;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 230,
+        "y": 260,
+        "wires": [
+            [
+                "bc7a244f7f095990"
+            ]
+        ]
+    },
+    {
+        "id": "535b73126982d60e",
+        "type": "catch",
+        "z": "242298931d4b0905",
+        "name": "",
+        "scope": "group",
+        "uncaught": true,
+        "x": 130,
+        "y": 80,
+        "wires": [
+            [
+                "a0cbc3ecca7fa040"
+            ]
+        ]
+    },
+    {
+        "id": "a0cbc3ecca7fa040",
+        "type": "function",
+        "z": "242298931d4b0905",
+        "name": "Format Error",
+        "func": "msg.payload = {\n        finish_reason: \"error\",\n        message: {\n            role: \"system\",\n            content: `Sorry, something went wrong. [${msg.error.message}]`\n        }\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 80,
+        "wires": [
+            [
+                "bc7a244f7f095990",
+                "4c5c446c2f3746ee"
+            ]
+        ]
+    },
+    {
+        "id": "d013b288bd849ed4",
+        "type": "node-red-contrib-basicauth",
+        "z": "242298931d4b0905",
+        "name": "",
+        "realm": "",
+        "username": "nodeuser",
+        "password": "nodepass",
+        "x": 250,
+        "y": 140,
+        "wires": [
+            [
+                "42ff02ec45a45c9b"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "af9d1b3b62e39d3d",
+        "type": "function",
+        "z": "242298931d4b0905",
+        "name": "Open AI",
+        "func": "const openai = new OpenAI({\n    apiKey: \"<use your own api key!>\",\n    baseURL: \"<customip for localai>\"\n});\n\nconst messages = msg.gpt.messages\n\nif(messages.length){\n    openai.chat.completions.create({\n        model: \"vicuna-13b-v1.5\",\n        messages,\n        temperature: 1,\n        max_tokens: 256,\n        top_p: 1,\n        frequency_penalty: 0,\n        presence_penalty: 0,\n    }).then(answer => {\n        msg.gpt.response = answer\n        node.send([msg, null]);\n        node.done();\n    })\n    return;\n}else{\n    return[null, new Error(\"No data sent to OpenAI\")]\n}\n\n\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "OpenAI",
+                "module": "openai"
+            }
+        ],
+        "x": 260,
+        "y": 220,
+        "wires": [
+            [
+                "976fbd6586ddf228"
+            ]
+        ]
+    }
+]
